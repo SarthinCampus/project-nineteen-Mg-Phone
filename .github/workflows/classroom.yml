@@ -1,0 +1,33 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Output Testing
+      id: output-testing
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Output Testing
+        setup-command: ''
+        command: python3 scope_explorer/main.py
+        input: ''
+        expected-output: "^Inner x: 30\\nOuter x after inner: 30\\nGlobal x: 10\\n?$"
+        comparison-method: regex
+        timeout: 10
+        max-score: 5
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        OUTPUT-TESTING_RESULTS: "${{steps.output-testing.outputs.result}}"
+      with:
+        runners: output-testing
